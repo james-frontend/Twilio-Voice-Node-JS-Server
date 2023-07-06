@@ -6,7 +6,7 @@ const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const defaultIdentity = 'alice';
 const callerId = 'client:quick_start';
 // Use a valid Twilio number by adding to your account via https://www.twilio.com/console/phone-numbers/verified
-const callerNumber = '1234567890';
+const callerNumber = '+19035463243';
 
 /**
  * Creates an access token with VoiceGrant using your Twilio credentials.
@@ -37,20 +37,28 @@ function tokenGenerator(request, response) {
   const pushCredSid = process.env.PUSH_CREDENTIAL_SID;
   const outgoingApplicationSid = process.env.APP_SID;
 
-  // Create an access token which we will sign and return to the client,
-  // containing the grant we just created
-  const voiceGrant = new VoiceGrant({
-      outgoingApplicationSid: outgoingApplicationSid,
-      pushCredentialSid: pushCredSid
-    });
+  const accessToken = new AccessToken(
+    accountSid,
+    apiKey,
+    apiSecret,
+    {
+      identity: identity
+    },
+  );
 
-  // Create an access token which we will sign and return to the client,
-  // containing the grant we just created
-  const token = new AccessToken(accountSid, apiKey, apiSecret);
-  token.addGrant(voiceGrant);
-  token.identity = identity;
-  console.log('Token:' + token.toJwt());
-  return response.send(token.toJwt());
+  const voiceGrant = new VoiceGrant({
+    incomingAllow: true,
+    pushCredentialSid: pushCredSid,
+    outgoingApplicationSid: outgoingApplicationSid,
+  });
+
+  accessToken.addGrant(voiceGrant);
+
+  // console.log(accessToken.toJwt());
+
+  return response.json({
+    token: accessToken.toJwt()
+  });
 }
 
 /**
@@ -69,10 +77,14 @@ function makeCall(request, response) {
   // The recipient of the call, a phone number or a client
   var to = null;
   if (request.method == 'POST') {
-    to = request.body.to;
+    to = request.body.To;
   } else {
-    to = request.query.to;
+    to = request.query.To;
   }
+
+  console.log("request body ==> ", request.body)
+  console.log("request query ==> ", request.query);
+  console.log("makeCall run this number ==> ", to);
 
   const voiceResponse = new VoiceResponse();
 
@@ -85,7 +97,8 @@ function makeCall(request, response) {
       const dial = voiceResponse.dial({callerId : callerId});
       dial.client(to);
   }
-  console.log('Response:' + voiceResponse.toString());
+  
+  console.log('Done call ==> ' + voiceResponse.toString());
   return response.send(voiceResponse.toString());
 }
 

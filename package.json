@@ -4,6 +4,8 @@
   "description": "Voice QuickStart Server for Node.js",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "NODE_ENV=test ./node_modules/.bin/jest"
   },
   "repository": {
@@ -20,9 +22,10 @@
     "node": "^10"
   },
   "dependencies": {
+    "body-parser": "^1.18.2",
     "dotenv": "^4.0.0",
     "express": "^4.15.2",
-    "body-parser": "^1.18.2",
+    "nodemon": "^2.0.22",
     "twilio": "^3.71.1"
   },
   "devDependencies": {
